@@ -12,8 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sendForm) sendForm.addEventListener("submit", handleSendMoney);
 });
 
-async function handleLogin(event) {
+function handleLogin(event) {
   event.preventDefault();
+
   const username = (document.getElementById("username") || {}).value?.trim() || "";
   const password = (document.getElementById("password") || {}).value || "";
 
@@ -22,32 +23,12 @@ async function handleLogin(event) {
     return;
   }
 
-  // Example: call your server endpoint for authentication.
-  // Replace "/api/login" with your real endpoint.
-  try {
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin", // or "include" if using cookies across origins
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (!res.ok) {
-      const error = await res.text();
-      alert("Login failed: " + error);
-      return;
-    }
-
-    const data = await res.json();
-    // Server should return success and any session token/cookie.
-    if (data && data.success) {
-      window.location.href = "dashboard.html";
-    } else {
-      alert("Invalid username or password.");
-    }
-  } catch (err) {
-    console.error("Login error:", err);
-    alert("An error occurred while logging in.");
+  // Hardcoded login for testing
+  if (username === "John Williams" && password === "Password123") {
+    alert("Login successful!");
+    window.location.href = "dashboard.html"; // redirect to dashboard
+  } else {
+    alert("Invalid username or password.");
   }
 }
 
