@@ -52,53 +52,20 @@ function handleLogout(event) {
   window.location.href = "index.html";
 }
 
-async function handleSendMoney(event) {
-  event.preventDefault();
-  const recipientEl = document.getElementById("recipient");
-  const amountEl = document.getElementById("amount");
+document.getElementById("send-money-form").addEventListener("submit", function(e) {
+  e.preventDefault(); // prevent form from reloading page
 
-  const recipient = recipientEl?.value?.trim() || "";
-  const rawAmount = amountEl?.value?.trim() || "";
-  const amount = parseFloat(rawAmount);
+  const bank = document.getElementById("bank").value;
+  const account = document.getElementById("account").value;
+  const recipient = document.getElementById("recipient").value;
+  const amount = document.getElementById("amount").value;
+  const note = document.getElementById("note").value;
 
-  if (!recipient) {
-    alert("Please enter a recipient.");
-    return;
-  }
-  if (!rawAmount || Number.isNaN(amount) || !isFinite(amount) || amount <= 0) {
-    alert("Please enter a valid positive amount.");
+  if (!bank || !account || !recipient || !amount) {
+    alert("Please fill all required fields!");
     return;
   }
 
-  // Optional client-side confirmation
-  const confirmMsg = `Send $${amount.toFixed(2)} to ${recipient}?`;
-  if (!confirm(confirmMsg)) return;
-
-  // POST to server to perform transaction securely
-  try {
-    const res = await fetch("/api/transactions/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ recipient, amount }),
-    });
-
-    if (!res.ok) {
-      const error = await res.text();
-      alert("Sending failed: " + error);
-      return;
-    }
-
-    const data = await res.json();
-    if (data && data.success) {
-      alert(`$${amount.toFixed(2)} sent to ${recipient}!`);
-      if (recipientEl) recipientEl.value = "";
-      if (amountEl) amountEl.value = "";
-    } else {
-      alert("Transaction failed: " + (data?.message || "unknown error"));
-    }
-  } catch (err) {
-    console.error("Transaction error:", err);
-    alert("An error occurred while sending money.");
-  }
-}
+  alert(`Successfully sent $${amount} to ${recipient} (${bank})`);
+  this.reset(); // clear form
+});
