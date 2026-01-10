@@ -81,3 +81,88 @@ function handleSendMoney(e) {
   alert(`Successfully sent $${amount} to ${recipient} (${bank})`);
   e.target.reset();
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  // ----- Toggle Transfer Form -----
+  const toggleBtn = document.getElementById("toggle-transfer-btn");
+  const sendForm = document.getElementById("send-money-form");
+
+  toggleBtn.addEventListener("click", () => {
+    sendForm.style.display = sendForm.style.display === "none" ? "block" : "none";
+  });
+
+  // ----- Balance Element -----
+  const balanceEl = document.querySelector(".balance");
+  let totalBalance = parseFloat(balanceEl.textContent.replace(/[$,]/g, ""));
+
+  // ----- Recent Transactions List -----
+  const transactionsList = document.querySelector(".transactions-card ul");
+
+  // ----- Send Money Form -----
+  const form = document.getElementById("send-money-form");
+  const amountInput = document.getElementById("amount");
+  const recipientInput = document.getElementById("recipient");
+  const bankSelect = document.getElementById("bank");
+  const sendBtn = document.getElementById("send-btn");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const amount = parseFloat(amountInput.value);
+    const recipient = recipientInput.value;
+    const bank = bankSelect.value;
+
+    // Validation
+    if (!bank) {
+      alert("Please select a bank.");
+      return;
+    }
+
+    if (!recipient) {
+      alert("Enter recipient name.");
+      return;
+    }
+
+    if (isNaN(amount) || amount <= 0) {
+      alert("Enter a valid amount.");
+      return;
+    }
+
+    if (amount > totalBalance) {
+      alert("Insufficient funds.");
+      return;
+    }
+
+    // Disable form and show processing animation
+    sendBtn.disabled = true;
+    let dots = 0;
+    const originalText = sendBtn.textContent;
+    sendBtn.textContent = "Processing";
+
+    const loader = setInterval(() => {
+      dots = (dots + 1) % 4;
+      sendBtn.textContent = "Processing" + ".".repeat(dots);
+    }, 400);
+
+    // Simulate 2-second bank processing
+    setTimeout(() => {
+      clearInterval(loader);
+
+      // Deduct balance
+      totalBalance -= amount;
+      balanceEl.textContent = "$" + totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      // Add to Recent Transactions
+      const li = document.createElement("li");
+      li.classList.add("expense"); // style like expense
+      li.innerHTML = `<span>Transfer to ${recipient} (${bank})</span><span>-$${amount.toLocaleString()}</span>`;
+      transactionsList.insertBefore(li, transactionsList.firstChild); // newest on top
+
+      // Show success and reset form
+      alert(`Transfer of $${amount.toLocaleString()} to ${recipient} successful ✔`);
+      form.reset();
+      sendBtn.disabled = false;
+      sendBtn.textContent = originalText;
+    }, 2000);
+  });
+});
