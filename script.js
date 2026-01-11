@@ -58,63 +58,70 @@ document.addEventListener("DOMContentLoaded", () => {
       transactionsList.insertBefore(li, transactionsList.firstChild);
     });
   }
-    // ===== MONTHLY SPENDING CHART =====
-  const spendingCanvas = document.getElementById("spendingChart");
-  if (spendingCanvas) {
-  const ctx = spendingCanvas.getContext("2d");
+      // ===== MONTHLY SPENDING CHART =====
+const spendingCanvas = document.getElementById("spendingChart");
+if (spendingCanvas) {
+  try {
+    const ctx = spendingCanvas.getContext("2d");
 
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  let monthlyExpenses = Array(12).fill(0);
-  let monthlyIncome = Array(12).fill(0);
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    let monthlyExpenses = Array(12).fill(0);
+    let monthlyIncome = Array(12).fill(0);
 
-    // use existing savedTransactions, do NOT redeclare
     savedTransactions.forEach(tx => {
-    const today = new Date();
-    const txDate = tx.date ? new Date(tx.date) : today;
-    const monthIndex = txDate.getMonth();
+      const today = new Date();
+      const txDate = tx.date ? new Date(tx.date) : today;
+      const monthIndex = txDate.getMonth();
 
-    if (tx.type === "expense") monthlyExpenses[monthIndex] += parseFloat(tx.amount.replace(/[-$,]/g,""));
-    if (tx.type === "income") monthlyIncome[monthIndex] += parseFloat(tx.amount.replace(/[$,]/g,""));
-  });
+      const expense = parseFloat(tx.amount.replace(/[-$,]/g,""));
+      if (tx.type === "expense" && !isNaN(expense)) monthlyExpenses[monthIndex] += expense;
 
-  new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: months,
-      datasets: [
-        {
-          label: "Expenses",
-          data: monthlyExpenses,
-          backgroundColor: "rgba(217, 69, 69, 0.7)",
-          borderRadius: 6
-        },
-        {
-          label: "Income",
-          data: monthlyIncome,
-          backgroundColor: "rgba(26, 154, 58, 0.7)",
-          borderRadius: 6
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: "top" },
-        tooltip: { mode: "index", intersect: false }
+      const income = parseFloat(tx.amount.replace(/[$,]/g,""));
+      if (tx.type === "income" && !isNaN(income)) monthlyIncome[monthIndex] += income;
+    });
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: months,
+        datasets: [
+          {
+            label: "Expenses",
+            data: monthlyExpenses,
+            backgroundColor: "rgba(217, 69, 69, 0.7)",
+            borderRadius: 6
+          },
+          {
+            label: "Income",
+            data: monthlyIncome,
+            backgroundColor: "rgba(26, 154, 58, 0.7)",
+            borderRadius: 6
+          }
+        ]
       },
-      scales: {
-        x: { stacked: false },
-        y: {
-          stacked: false,
-          beginAtZero: true,
-          ticks: {
-            callback: function(value){ return "$" + value.toLocaleString(); }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "top" },
+          tooltip: { mode: "index", intersect: false }
+        },
+        scales: {
+          x: { stacked: false },
+          y: {
+            stacked: false,
+            beginAtZero: true,
+            ticks: {
+              callback: function(value){ return "$" + value.toLocaleString(); }
+            }
           }
         }
       }
-    }
-  });
+    });
+
+  } catch(e) {
+    console.error("Error rendering spending chart:", e);
+  }
 }
 
   // Toggle Transfer Form
