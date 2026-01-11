@@ -110,35 +110,40 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ----- Optional: Login handler (if on login page) -----
-  const loginForm = document.getElementById("login-form");
-  if (loginForm) {
-    loginForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const username = document.getElementById("username")?.value?.trim() || "";
-      const password = document.getElementById("password")?.value || "";
-      const messageEl = document.getElementById("login-message");
+const loginForm = document.getElementById("login-form");
+if (loginForm) {
+  loginForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const username = document.getElementById("username")?.value?.trim() || "";
+    const password = document.getElementById("password")?.value || "";
+    const messageEl = document.getElementById("login-message");
 
-      if (!username || !password) {
-        alert("Please enter both username and password.");
-        return;
-      }
+    if (!username || !password) {
+      alert("Please enter both username and password.");
+      return;
+    }
 
+    if (messageEl) { // ✅ check exists
       messageEl.style.color = "blue";
       messageEl.textContent = "Checking credentials...";
+    }
 
-      setTimeout(() => {
-        if (username === "John Williams" && password === "Password123") {
+    setTimeout(() => {
+      if (username === "John Williams" && password === "Password123") {
+        if (messageEl) { 
           messageEl.style.color = "green";
           messageEl.textContent = "Login successful! Redirecting...";
-          setTimeout(() => {
-            window.location.href = "dashboard.html";
-          }, 1000);
-        } else {
+        }
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1000);
+      } else {
+        if (messageEl) {
           messageEl.style.color = "red";
           messageEl.textContent = "Invalid username or password.";
         }
-      }, 1500);
-    });
-  }
-});
+        alert("Invalid username or password."); // fallback if no messageEl
+      }
+    }, 1500);
+  });
+}
