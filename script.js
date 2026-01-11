@@ -39,6 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
 let totalBalance = balanceEl 
     ? parseFloat(balanceEl.textContent.replace(/[$,]/g, "")) 
     : 0;
+  
+// Make the HTML balance the main balance
+localStorage.setItem("totalBalance", totalBalance);
 
 // 3️⃣ Update balance display
 balanceEl && (balanceEl.textContent = "$" + totalBalance.toLocaleString(undefined, { 
