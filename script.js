@@ -1,15 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ===== 1️⃣ Reset or set sample transactions =====
-  localStorage.setItem("transactions", JSON.stringify([
+   let savedTransactions = JSON.parse(localStorage.getItem("transactions"));
+
+  if (!savedTransactions || savedTransactions.length === 0) {
+  savedTransactions = [
     { type: "income", text: "Salary Deposit", amount: "$5000", date: "2026-01-01" },
     { type: "expense", text: "Amazon — Shopping", amount: "$120", date: "2026-01-10" },
     { type: "expense", text: "Uber — Transport", amount: "$50", date: "2026-01-12" },
     { type: "expense", text: "Netflix — Entertainment", amount: "$15", date: "2026-01-20" },
     { type: "expense", text: "Rent — Housing", amount: "$500", date: "2026-01-01" }
-  ]));
+  ];
+  localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+}
   
-
   // ===== 2️⃣ LOGIN HANDLER =====
   const loginForm = document.getElementById("login-form");
   if (loginForm) {
