@@ -347,3 +347,20 @@ canvas#spendingChart { width: 100% !important; height: 200px !important; }
   width: 100% !important;
   height: 300px !important;
 }
+
+.balance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#toggle-balance {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.hidden {
+  letter-spacing: 4px;
+}
