@@ -435,13 +435,15 @@ canvas#spendingChart { width: 100% !important; height: 200px !important; }
   background: #999;
 }
 
-.spending-trends-card canvas {
-  height: 300px; /* adjust as needed */
-  width: 100%;
-}
-
 .spending-trends-card {
-  height: 320px; /* or 400px */
+  width: 100%;
+  max-width: 800px;   /* optional */
+  margin: 20px auto;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  background: #fff;
+  height: 320px;      /* controls chart height */
 }
 
 .spending-trends-card canvas {
