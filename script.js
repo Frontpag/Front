@@ -210,6 +210,6 @@ toggleBtn.addEventListener("click", () => {
     }
   });
 
-  toggleBtn.textContent = visible ? "🙈" : "👁";
+  toggleBtn.textContent = visible ? "👁‍🗨" : "👁";
   visible = !visible;
 });
