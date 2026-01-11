@@ -72,7 +72,6 @@ if (toggleBalanceBtn && sensitiveBalances.length > 0 && eyeOpen && eyeClosed) {
     visible = !visible;
   });
 }
-
   
 // Step 1: Check localStorage first
 let totalBalance = parseFloat(localStorage.getItem("totalBalance"));
