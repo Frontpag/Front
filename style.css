@@ -332,3 +332,18 @@ canvas#spendingChart { width: 100% !important; height: 200px !important; }
     gap: 10px;
   }
 }
+
+.spending-trends-card {
+  width: 100%;
+  max-width: 800px;   /* keeps it from being too wide on desktop */
+  margin: 20px auto;  /* centers it */
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  background: #fff;
+}
+
+#spendingChart {
+  width: 100% !important;
+  height: 300px !important;
+}
