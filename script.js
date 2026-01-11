@@ -261,3 +261,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 });
+
+document.querySelectorAll(".quick-btn").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    const action = e.currentTarget.dataset.action;
+
+    if(action === "pay-bill") {
+      alert("Redirecting to Pay Bill form...");
+      // or open your modal: showModal('payBillModal');
+    } 
+    else if(action === "send-money") {
+      // show your existing send money form
+      const sendForm = document.getElementById("send-money-form");
+      const toggleBtn = document.getElementById("toggle-transfer-btn");
+      sendForm.style.display = "block";
+      toggleBtn.textContent = "Hide Transfer Form";
+      sendForm.scrollIntoView({behavior: "smooth"});
+    } 
+    else if(action === "request-money") {
+      alert("Redirecting to Request Money form...");
+      // implement your Request Money modal/form
+    }
+  });
+});
