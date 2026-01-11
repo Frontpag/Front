@@ -35,12 +35,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const balanceEl = document.querySelector(".balance");
   const transactionsList = document.querySelector(".transactions-card ul");
 
-// 1️⃣ Read balance from HTML first
+// 1️⃣ Read balance from HTML
 let totalBalance = balanceEl 
     ? parseFloat(balanceEl.textContent.replace(/[$,]/g, "")) 
     : 0;
-  
-// Make the HTML balance the main balance
+
+// 2️⃣ Optional: overwrite localStorage so HTML value becomes main balance
 localStorage.setItem("totalBalance", totalBalance);
 
 // 3️⃣ Update balance display
