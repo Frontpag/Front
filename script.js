@@ -28,47 +28,13 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 1500);
     });
   }
-  
+
   // ===== DASHBOARD =====
   const sendForm = document.getElementById("send-money-form");
   const toggleBtn = document.getElementById("toggle-transfer-btn");
   const balanceEl = document.querySelector(".balance");
   const transactionsList = document.querySelector(".transactions-card ul");
 
-// --------------------------
-// ===== BALANCE TOGGLE =====
-// --------------------------
-const eyeOpen = document.getElementById("eye-open");
-const eyeClosed = document.getElementById("eye-closed");
-const toggleBalanceBtn = document.getElementById("toggle-balance");
-const sensitiveBalances = document.querySelectorAll(".sensitive");
-
-if (toggleBalanceBtn && sensitiveBalances.length > 0 && eyeOpen && eyeClosed) {
-  let visible = true;
-  const originalValues = [];
-  sensitiveBalances.forEach(el => originalValues.push(el.textContent));
-
-  toggleBalanceBtn.addEventListener("click", () => {
-    // Hide or show balances
-    sensitiveBalances.forEach((el, index) => {
-      if (visible) {
-        el.textContent = "••••••"; // hide
-        el.classList.add("hidden");
-      } else {
-        el.textContent = originalValues[index]; // show
-        el.classList.remove("hidden");
-      }
-    });
-
-    // Toggle eye icon
-    eyeOpen.style.display = visible ? "none" : "block";
-    eyeClosed.style.display = visible ? "block" : "none";
-
-    // Flip visibility state
-    visible = !visible;
-  });
-}
-  
 // Step 1: Check localStorage first
 let totalBalance = parseFloat(localStorage.getItem("totalBalance"));
 
@@ -221,3 +187,29 @@ balanceEl.textContent = "$" + totalBalance.toLocaleString(undefined, { minimumFr
   logoutBtn && logoutBtn.addEventListener("click", () => window.location.href = "index.html");
 
 });
+
+const toggleBtn = document.getElementById("toggle-balance");
+const sensitiveBalances = document.querySelectorAll(".sensitive");
+
+let visible = true;
+
+// store original values
+const originalValues = [];
+sensitiveBalances.forEach(el => {
+  originalValues.push(el.textContent);
+});
+
+toggleBtn.addEventListener("click", () => {
+  sensitiveBalances.forEach((el, index) => {
+    if (visible) {
+      el.textContent = "••••••";
+      el.classList.add("hidden");
+    } else {
+      el.textContent = originalValues[index];
+      el.classList.remove("hidden");
+    }
+  });
+
+  toggleBtn.textContent = visible ? "👁‍🗨" : "👁";
+  visible = !visible;
+});                          
