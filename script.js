@@ -236,6 +236,56 @@ document.addEventListener("DOMContentLoaded", () => {
     visible = !visible;
   });
 
+   // ===== DEMO USER =====
+const demoUser = {
+  fullName: "John Williams",
+  email: "jsonwilliams084@gmail.com",
+  phone: "+1 903 1408 205",
+  password: "1346799",
+  emailNotif: true,
+  smsNotif: false
+};
+
+// ===== CHANGE PASSWORD =====
+const passwordForm = document.getElementById("password-form");
+if (passwordForm) {
+  const passwordMessage = document.getElementById("password-message");
+  passwordForm.addEventListener("submit", e => {
+    e.preventDefault(); // stops the page from refreshing
+    const current = document.getElementById("currentPassword").value;
+    const newP = document.getElementById("newPassword").value;
+    const confirmP = document.getElementById("confirmPassword").value;
+
+    if (current !== demoUser.password) {
+      passwordMessage.textContent = "Current password is incorrect!";
+      passwordMessage.classList.remove("success");
+      passwordMessage.classList.add("error");
+      return;
+    }
+
+    if (newP.length < 6) {
+      passwordMessage.textContent = "New password must be at least 6 characters!";
+      passwordMessage.classList.remove("success");
+      passwordMessage.classList.add("error");
+      return;
+    }
+
+    if (newP !== confirmP) {
+      passwordMessage.textContent = "New passwords do not match!";
+      passwordMessage.classList.remove("success");
+      passwordMessage.classList.add("error");
+      return;
+    }
+
+    demoUser.password = newP;
+    passwordMessage.textContent = "Password reset link sent to email ✔";
+    passwordMessage.classList.remove("error");
+    passwordMessage.classList.add("success");
+
+    passwordForm.reset();
+  });
+}
+
   // ===== QUICK BUTTONS =====
   document.querySelectorAll(".quick-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
