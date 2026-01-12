@@ -581,18 +581,3 @@ canvas#spendingChart { width: 100% !important; height: 200px !important; }
 #logoutBtn:hover {
   opacity: 0.85;
 }
-
-/* For both Pay Bill & Request Money cards */
-.pay-bill-card,
-.request-money-card {
-  max-height: 0;           /* start collapsed */
-  overflow: hidden;
-  transition: max-height 0.5s ease, padding 0.5s ease;
-  padding: 0 15px;         /* initial padding */
-}
-
-/* Active (open) state */
-.card.open {
-  max-height: 1000px;      /* big enough to show content */
-  padding: 15px;           /* restore padding */
-}
