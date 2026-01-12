@@ -290,7 +290,6 @@ if (logoutBtn) logoutBtn.addEventListener("click", () => {
 });
 
    document.addEventListener("DOMContentLoaded", () => {
-
   const profileBtn = document.getElementById("profile-btn");
   const profilePanel = document.getElementById("profile-panel");
   const closeProfileBtn = document.getElementById("close-profile");
@@ -301,7 +300,7 @@ if (logoutBtn) logoutBtn.addEventListener("click", () => {
 
   // Toggle profile panel
   profileBtn.addEventListener("click", (e) => {
-    e.stopPropagation(); // prevent document click
+    e.stopPropagation(); // prevent document click from immediately closing
     profilePanel.style.display = profilePanel.style.display === "block" ? "none" : "block";
   });
 
@@ -312,7 +311,7 @@ if (logoutBtn) logoutBtn.addEventListener("click", () => {
     });
   }
 
-  // Click outside panel to close
+  // Close when clicking outside panel
   document.addEventListener("click", (e) => {
     if (profilePanel.style.display === "block" && !profilePanel.contains(e.target) && !profileBtn.contains(e.target)) {
       profilePanel.style.display = "none";
@@ -331,5 +330,4 @@ if (logoutBtn) logoutBtn.addEventListener("click", () => {
       window.location.href = "account.html"; // make sure this page exists
     });
   }
-
 });
