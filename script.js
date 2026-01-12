@@ -236,55 +236,6 @@ quickBtns.forEach(btn => {
     }
   });
 });
-
-// Utility: add transaction to Recent Transactions
-function addTransaction(type, text, amount) {
-  let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-  transactions.unshift({
-    type, // 'expense' for Pay Bill, 'income' for Request Money
-    text,
-    amount: `$${amount}`,
-    date: new Date().toISOString().split('T')[0]
-  });
-  localStorage.setItem('transactions', JSON.stringify(transactions));
-  updateTransactionsUI();
-}
-
-// Update Recent Transactions UI
-function updateTransactionsUI() {
-  const ul = document.querySelector('.transactions-card ul');
-  const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-  ul.innerHTML = '';
-  transactions.forEach(tx => {
-    const li = document.createElement('li');
-    li.className = tx.type === 'expense' ? 'expense' : 'income';
-    li.innerHTML = `<span>${tx.text}</span><span>${tx.amount}</span>`;
-    ul.appendChild(li);
-  });
-}
-
-// Handle Pay Bill Submission
-document.getElementById('pay-bill-form').addEventListener('submit', e => {
-  e.preventDefault();
-  const biller = document.getElementById('biller').value;
-  const amount = document.getElementById('bill-amount').value;
-  addTransaction('expense', `Bill — ${biller}`, amount);
-  alert(`Paid $${amount} to ${biller}`);
-  document.getElementById('pay-bill-form').reset();
-});
-
-// Handle Request Money Submission
-document.getElementById('request-money-form').addEventListener('submit', e => {
-  e.preventDefault();
-  const recipient = document.getElementById('request-recipient').value;
-  const amount = document.getElementById('request-amount').value;
-  addTransaction('income', `Request from ${recipient}`, amount);
-  alert(`Requested $${amount} from ${recipient}`);
-  document.getElementById('request-money-form').reset();
-});
-
-// Update transactions on page load
-updateTransactionsUI();
   
   // ===== LOGOUT =====
   const logoutBtn = document.getElementById("logout-btn");
