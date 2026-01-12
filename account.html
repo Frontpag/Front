@@ -100,8 +100,8 @@
 <script>
   // ===== Demo Account Data =====
   const demoAccount = {
-    accountNumber: "08068648488",
-    balance: 1,500,450.50,
+    accountNumber: "21908488433",
+    balance: 1500450.50,
     dailyLimit: 40000,
     linkedAccounts: [
       { bank: "Bank of America", number: "5678" },
@@ -121,7 +121,7 @@
     showAccount = !showAccount;
     accountNumberEl.textContent = showAccount 
       ? demoAccount.accountNumber.replace(/(\d{4})(?=\d)/g, "$1 ") 
-      : "**** **** 1234";
+      : "**** **** 8433";
     accountBalanceEl.textContent = showAccount 
       ? "$" + demoAccount.balance.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})
       : "$••••••";
