@@ -1,29 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Account Settings | Front Page</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-
-  <style>
-    .info-page { max-width: 550px; margin: 30px auto; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-    h1, h2 { margin-bottom: 15px; }
-    .form-group { margin-bottom: 15px; }
-    input, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; }
-    button { padding: 10px 20px; border: none; border-radius: 6px; background: #007bff; color: #fff; cursor: pointer; }
-    button:hover { background: #0056b3; }
-    .toggle-switch { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .message { margin-top: 10px; font-weight: 500; }
-    .success { color: green; }
-    .error { color: red; }
-    .masked { letter-spacing: 3px; }
-    ul { list-style: none; padding: 0; }
-    li { margin-bottom: 8px; }
-    .remove-btn { background:#dc3545; margin-left:10px; padding:4px 10px; font-size:12px; }
-  </style>
+<meta charset="UTF-8">
+<title>Account Settings | Front Page</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<style>
+  body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:0; }
+  .info-page { max-width:550px; margin:30px auto; padding:20px; background:#fff; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.1); }
+  h1, h2 { margin-bottom:15px; }
+  input, select, button { width:100%; padding:10px; border-radius:6px; border:1px solid #ccc; margin-bottom:10px; box-sizing:border-box; }
+  button { background:#007bff; color:#fff; cursor:pointer; border:none; }
+  button:hover { background:#0056b3; }
+  .toggle-switch { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .message { margin-top:10px; font-weight:500; }
+  .success { color:green; }
+  .error { color:red; }
+  .masked { letter-spacing:3px; }
+  ul { list-style:none; padding:0; }
+  li { margin-bottom:8px; }
+  .remove-btn { background:#dc3545; margin-left:10px; padding:4px 10px; font-size:12px; border:none; color:#fff; border-radius:4px; cursor:pointer; }
+  .remove-btn:hover { opacity:0.85; }
+  .navbar { display:flex; justify-content:space-between; padding:10px 20px; background:#007bff; color:#fff; align-items:center; }
+  .navbar a { color:#fff; text-decoration:none; }
+</style>
 </head>
-
 <body>
 
 <script>
@@ -34,7 +35,7 @@
 
 <nav class="navbar">
   <div class="profile">Front Page</div>
-  <a href="dashboard.html" class="logout-btn">Back to Dashboard</a>
+  <a href="dashboard.html">Back to Dashboard</a>
 </nav>
 
 <main class="info-page">
@@ -53,39 +54,39 @@
   </section>
 
   <!-- Daily Transfer Limit -->
-  <section style="margin-top:30px;">
+  <section>
     <h2>Daily Transfer Limit</h2>
     <form id="limits-form">
-      <input type="number" id="dailyLimit" min="0" step="100" required>
+      <input type="number" id="dailyLimit" min="0" step="100" required placeholder="Enter daily limit">
       <button type="submit">Update Limit</button>
-      <p id="limit-message" class="message"></p>
+      <p id="limitMessage" class="message"></p>
     </form>
   </section>
 
   <!-- Linked Accounts -->
-  <section style="margin-top:30px;">
+  <section>
     <h2>Linked Accounts</h2>
     <ul id="linkedAccounts"></ul>
     <button id="addAccountBtn">Add Linked Account</button>
-    <p id="linked-message" class="message"></p>
+    <p id="linkedMessage" class="message"></p>
   </section>
 
   <!-- Transaction Alerts -->
-  <section style="margin-top:30px;">
+  <section>
     <h2>Transaction Alerts</h2>
     <div class="toggle-switch">
       <input type="checkbox" id="txnEmailNotif">
-      <label>Email alerts for transactions above $1000</label>
+      <label for="txnEmailNotif">Email alerts for transactions above $1000</label>
     </div>
     <div class="toggle-switch">
       <input type="checkbox" id="txnSMSNotif">
-      <label>SMS alerts for transactions above $1000</label>
+      <label for="txnSMSNotif">SMS alerts for transactions above $1000</label>
     </div>
     <button id="saveAlertsBtn">Save Alerts</button>
-    <p id="alerts-message" class="message"></p>
+    <p id="alertsMessage" class="message"></p>
   </section>
 
-  <section style="margin-top:30px;">
+  <section>
     <button id="logoutBtn" style="background:#dc3545;">Logout</button>
   </section>
 </main>
@@ -101,11 +102,11 @@
     balance: 1500450.50,
     dailyLimit: 40000,
     linkedAccounts: [
-      { bank: "Bank of America", number: "5678" },
-      { bank: "Chase Bank", number: "9012" }
+      { bank:"Bank of America", number:"5678" },
+      { bank:"Chase Bank", number:"9012" }
     ],
-    txnEmailAlerts: true,
-    txnSMSAlerts: false
+    txnEmailAlerts:true,
+    txnSMSAlerts:false
   };
 
   let accountData = JSON.parse(localStorage.getItem("accountData")) || defaultAccount;
@@ -116,38 +117,44 @@
   const accountBalanceEl = document.getElementById("accountBalance");
   const toggleBtn = document.getElementById("toggleAccountNumber");
   let visible = false;
-
   toggleBtn.onclick = () => {
     visible = !visible;
-    accountNumberEl.textContent = visible
-      ? accountData.accountNumber.replace(/(\d{4})(?=\d)/g, "$1 ")
+    accountNumberEl.textContent = visible 
+      ? accountData.accountNumber.replace(/(\d{4})(?=\d)/g,"$1 ") 
       : "**** **** 8433";
-
-    accountBalanceEl.textContent = visible
-      ? "$" + accountData.balance.toLocaleString()
+    accountBalanceEl.textContent = visible 
+      ? "$" + accountData.balance.toLocaleString(undefined,{minimumFractionDigits:2}) 
       : "$••••••";
-
     toggleBtn.textContent = visible ? "Hide" : "Show";
   };
 
   // ===== DAILY LIMIT =====
+  const dailyLimitInput = document.getElementById("dailyLimit");
+  const limitMessage = document.getElementById("limitMessage");
+  dailyLimitInput.value = accountData.dailyLimit;
   document.getElementById("limits-form").onsubmit = e => {
     e.preventDefault();
-    accountData.dailyLimit = Number(dailyLimit.value);
+    const newLimit = Number(dailyLimitInput.value);
+    if (newLimit <= 0 || isNaN(newLimit)) {
+      limitMessage.textContent = "Invalid daily limit!";
+      limitMessage.className = "message error";
+      return;
+    }
+    accountData.dailyLimit = newLimit;
     localStorage.setItem("accountData", JSON.stringify(accountData));
-    limit-message.textContent = "Daily limit updated ✔";
-    limit-message.className = "message success";
+    limitMessage.textContent = "Daily limit updated ✔";
+    limitMessage.className = "message success";
   };
 
   // ===== LINKED ACCOUNTS =====
   const linkedList = document.getElementById("linkedAccounts");
+  const linkedMessage = document.getElementById("linkedMessage");
 
   function renderLinkedAccounts() {
     linkedList.innerHTML = "";
-    accountData.linkedAccounts.forEach((acc, i) => {
+    accountData.linkedAccounts.forEach((acc,i)=>{
       const li = document.createElement("li");
-      li.innerHTML = `${acc.bank} — **** ${acc.number}
-        <button class="remove-btn" data-index="${i}">Remove</button>`;
+      li.innerHTML = `${acc.bank} — **** ${acc.number} <button class="remove-btn" data-index="${i}">Remove</button>`;
       linkedList.appendChild(li);
     });
   }
@@ -160,22 +167,27 @@
       accountData.linkedAccounts.push({ bank, number });
       localStorage.setItem("accountData", JSON.stringify(accountData));
       renderLinkedAccounts();
-      linked-message.textContent = "Linked account added ✔";
-      linked-message.className = "message success";
+      linkedMessage.textContent = "Linked account added ✔";
+      linkedMessage.className = "message success";
     }
   };
 
   linkedList.onclick = e => {
-    if (e.target.classList.contains("remove-btn")) {
-      accountData.linkedAccounts.splice(e.target.dataset.index, 1);
+    if(e.target.classList.contains("remove-btn")){
+      accountData.linkedAccounts.splice(e.target.dataset.index,1);
       localStorage.setItem("accountData", JSON.stringify(accountData));
       renderLinkedAccounts();
-      linked-message.textContent = "Linked account removed ✔";
-      linked-message.className = "message success";
+      linkedMessage.textContent = "Linked account removed ✔";
+      linkedMessage.className = "message success";
     }
   };
 
   // ===== ALERTS =====
+  const txnEmailNotif = document.getElementById("txnEmailNotif");
+  const txnSMSNotif = document.getElementById("txnSMSNotif");
+  const saveAlertsBtn = document.getElementById("saveAlertsBtn");
+  const alertsMessage = document.getElementById("alertsMessage");
+
   txnEmailNotif.checked = accountData.txnEmailAlerts;
   txnSMSNotif.checked = accountData.txnSMSAlerts;
 
@@ -183,14 +195,14 @@
     accountData.txnEmailAlerts = txnEmailNotif.checked;
     accountData.txnSMSAlerts = txnSMSNotif.checked;
     localStorage.setItem("accountData", JSON.stringify(accountData));
-    alerts-message.textContent = "Alerts saved ✔";
-    alerts-message.className = "message success";
+    alertsMessage.textContent = "Alerts saved ✔";
+    alertsMessage.className = "message success";
   };
 
   // ===== LOGOUT =====
-  logoutBtn.onclick = () => {
+  document.getElementById("logoutBtn").onclick = () => {
     localStorage.removeItem("loggedIn");
-    window.location.href = "index.html";
+    window.location.href="index.html";
   };
 </script>
 
