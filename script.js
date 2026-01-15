@@ -213,45 +213,61 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        // Normal transfer
-        pinModal.style.display = "none";
-        sendBtn.disabled = true;
-        const originalText = sendBtn.textContent;
-        let dots = 0;
-        sendBtn.textContent = "Processing";
-        const loader = setInterval(() => {
-          dots = (dots + 1) % 4;
-          sendBtn.textContent = "Processing" + ".".repeat(dots);
-        }, 400);
+        // ===== NORMAL TRANSFER =====
+  pinModal.style.display = "none";
+  sendBtn.disabled = true;
+  const originalText = sendBtn.textContent;
+  let dots = 0;
+  sendBtn.textContent = "Processing";
+  const loader = setInterval(() => {
+  dots = (dots + 1) % 4;
+  sendBtn.textContent = "Processing" + ".".repeat(dots);
+}, 4000);
 
-        setTimeout(() => {
-          clearInterval(loader);
-          totalBalance -= amount;
-          balanceEl.textContent = "$" + totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  setTimeout(() => {
+  clearInterval(loader);
 
-          const li = document.createElement("li");
-          li.classList.add("expense");
-          li.innerHTML = `<span>Transfer to ${recipient} (${bank})${note ? " — " + note : ""}</span><span>-$${amount.toLocaleString()}</span>`;
-          transactionsList.insertBefore(li, transactionsList.firstChild);
+  // Deduct balance
+  totalBalance -= amount;
+  balanceEl.textContent = "$" + totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-          savedTransactions.unshift({
-            type: "expense",
-            text: `Transfer to ${recipient} (${bank})${note ? " — " + note : ""}`,
-            amount: "-$" + amount.toLocaleString()
-          });
+  // Save transaction
+  const txText = `Transfer to ${recipient} (${bank})${note ? " — " + note : ""}`;
+  const tx = {
+    type: "expense",
+    text: txText,
+    amount: "-$" + amount.toLocaleString(),
+    date: new Date().toISOString().split("T")[0]
+  };
+  savedTransactions.unshift(tx);
+  localStorage.setItem("totalBalance", totalBalance);
+  localStorage.setItem("transactions", JSON.stringify(savedTransactions));
 
-          localStorage.setItem("totalBalance", totalBalance);
-          localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+  // Update UI transaction list
+  const li = document.createElement("li");
+  li.classList.add("expense");
+  li.innerHTML = `<span>${tx.text}</span><span>${tx.amount}</span>`;
+  transactionsList.insertBefore(li, transactionsList.firstChild);
 
-          sendForm.reset();
-          sendBtn.disabled = false;
-          sendBtn.textContent = originalText;
-          sendForm.style.display = "none";
-          toggleTransferBtn.textContent = "Transfer Funds";
-        }, 4000);
-      };
-    });
-  }
+  // ===== RECEIPT =====
+  const txnId = "TXN-" + Math.floor(Math.random() * 100000000);
+  const dateStr = new Date().toLocaleString();
+  document.getElementById("r-id").textContent = txnId;
+  document.getElementById("r-name").textContent = recipient;
+  document.getElementById("r-amount").textContent = "$" + amount.toLocaleString();
+  document.getElementById("r-date").textContent = dateStr;
+
+  // Show custom success modal
+  document.getElementById("success-modal").style.display = "flex";
+
+  // Reset form & button
+  sendForm.reset();
+  sendBtn.disabled = false;
+  sendBtn.textContent = originalText;
+  sendForm.style.display = "none";
+  toggleTransferBtn.textContent = "Transfer Funds";
+
+}, 4000);
 
   // ===== QUICK BUTTONS =====
   const quickBtns = document.querySelectorAll('.quick-btn');
