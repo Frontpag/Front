@@ -214,17 +214,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // ===== NORMAL TRANSFER =====
-  pinModal.style.display = "none";
-  sendBtn.disabled = true;
-  const originalText = sendBtn.textContent;
-  let dots = 0;
-  sendBtn.textContent = "Processing";
-  const loader = setInterval(() => {
+pinModal.style.display = "none";
+sendBtn.disabled = true;
+const originalText = sendBtn.textContent;
+let dots = 0;
+sendBtn.textContent = "Processing";
+const loader = setInterval(() => {
   dots = (dots + 1) % 4;
   sendBtn.textContent = "Processing" + ".".repeat(dots);
-}, 4000);
+}, 400); // fast animation (0.4 sec per dot)
 
-  setTimeout(() => {
+setTimeout(() => {
   clearInterval(loader);
 
   // Deduct balance
@@ -267,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
   sendForm.style.display = "none";
   toggleTransferBtn.textContent = "Transfer Funds";
 
-}, 4000);
+}, 4000); // total processing = 4 sec
 
   // ===== QUICK BUTTONS =====
   const quickBtns = document.querySelectorAll('.quick-btn');
