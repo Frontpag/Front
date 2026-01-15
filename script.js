@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // ===== DEMO USER =====
+
+  // ===== GLOBAL DEMO USER =====
   let demoUser = JSON.parse(localStorage.getItem("demoUser"));
   if (!demoUser) {
     demoUser = {
@@ -12,62 +13,68 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     localStorage.setItem("demoUser", JSON.stringify(demoUser));
   }
+
   // ===== INITIAL TRANSACTIONS =====
-  let savedTransactions = JSON.parse(localStorage.getItem("transactions"));
-  if (!savedTransactions || savedTransactions.length === 0) {
+  let savedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
+  if (!savedTransactions.length) {
     savedTransactions = [
       { type: "expense", text: "Netflix — Entertainment", amount: "$150", date: "2026-01-05" },
-      { type: "income", text: "Salary — Deposit", amount: "$69000", date: "2026-01-09" },
+      { type: "income", text: "Salary — Deposit", amount: "$69000", date: "2026-01-09" }
     ];
     localStorage.setItem("transactions", JSON.stringify(savedTransactions));
   }
 
-  // ===== LOGIN HANDLER =====
-  const loginForm = document.getElementById("login-form");
-  if (loginForm) {
-    const messageEl = document.getElementById("login-message");
-    loginForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const username = document.getElementById("username")?.value?.trim() || "";
-      const password = document.getElementById("password")?.value || "";
-      if (!username || !password) return alert("Enter both username & password.");
+  // ===== TOTAL BALANCE =====
+  const balanceEl = document.querySelector(".balance");
+  let totalBalance = parseFloat(localStorage.getItem("totalBalance"));
+  if (!totalBalance) totalBalance = balanceEl ? parseFloat(balanceEl.textContent.replace(/[$,]/g, "")) : 0;
+  if (balanceEl) balanceEl.textContent = "$" + totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-      if (messageEl) messageEl.style.color = "blue";
+  // ===== LOGIN FORM =====
+  const loginForm = document.getElementById("login-form");
+  const messageEl = document.getElementById("login-message");
+  if (loginForm) {
+    loginForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!username || !password) {
+        messageEl.style.color = "red";
+        messageEl.textContent = "Please enter both username and password.";
+        return;
+      }
+
+      messageEl.style.color = "blue";
       messageEl.textContent = "Checking credentials...";
 
       setTimeout(() => {
-          const savedUser = JSON.parse(localStorage.getItem("demoUser")) || {};
-          if (username === savedUser.fullName && password === savedUser.password) {
-          if (messageEl) {
-            messageEl.style.color = "green";
-            messageEl.textContent = "Login successful! Redirecting...";
-            localStorage.setItem("loggedIn", "true");
-          }
-          setTimeout(() => window.location.href = "dashboard.html", 1000);
+        if (username === demoUser.fullName && password === demoUser.password) {
+          localStorage.setItem("loggedIn", "true");
+          messageEl.style.color = "green";
+          messageEl.textContent = "Login successful! Redirecting...";
+          setTimeout(() => window.location.href = "dashboard.html", 500);
         } else {
-          if (messageEl) {
-            messageEl.style.color = "red";
-            messageEl.textContent = "Invalid username or password.";
-          }
-          alert("Invalid username or password.");
+          messageEl.style.color = "red";
+          messageEl.textContent = "Invalid username or password.";
         }
-      }, 1500);
+      }, 500);
     });
+  }
+
+  // ===== AUTO REDIRECT IF LOGGED IN =====
+  if (localStorage.getItem("loggedIn") && window.location.pathname.endsWith("index.html")) {
+    window.location.href = "dashboard.html";
   }
 
   // ===== DASHBOARD ELEMENTS =====
   const sendForm = document.getElementById("send-money-form");
   const toggleTransferBtn = document.getElementById("toggle-transfer-btn");
-  const balanceEl = document.querySelector(".balance");
   const transactionsList = document.querySelector(".transactions-card ul");
 
-  // ===== BALANCE =====
-  let totalBalance = parseFloat(localStorage.getItem("totalBalance"));
-  if (!totalBalance) totalBalance = balanceEl ? parseFloat(balanceEl.textContent.replace(/[$,]/g, "")) : 0;
-  if (balanceEl) balanceEl.textContent = "$" + totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  // ===== RENDER TRANSACTIONS =====
+  // Render Transactions
   if (transactionsList) {
+    transactionsList.innerHTML = "";
     savedTransactions.forEach(tx => {
       const li = document.createElement("li");
       li.classList.add(tx.type);
@@ -76,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ===== MONTHLY CHART =====
+  // ===== CHART =====
   try {
     const spendingCanvas = document.getElementById("spendingChart");
     if (spendingCanvas) {
@@ -89,13 +96,10 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           const txDate = tx.date ? new Date(tx.date) : new Date();
           const monthIndex = txDate.getMonth();
-          const expense = parseFloat(tx.amount.replace(/[-$,]/g,""));
-          if (tx.type === "expense" && !isNaN(expense)) monthlyExpenses[monthIndex] += expense;
-          const income = parseFloat(tx.amount.replace(/[$,]/g,""));
-          if (tx.type === "income" && !isNaN(income)) monthlyIncome[monthIndex] += income;
-        } catch(e) {
-          console.warn("Skipping invalid transaction:", tx);
-        }
+          const amountValue = parseFloat(tx.amount.replace(/[-$,]/g,""));
+          if (tx.type === "expense" && !isNaN(amountValue)) monthlyExpenses[monthIndex] += amountValue;
+          if (tx.type === "income" && !isNaN(amountValue)) monthlyIncome[monthIndex] += amountValue;
+        } catch(e) { console.warn("Skipping invalid transaction:", tx); }
       });
 
       new Chart(ctx, {
@@ -117,15 +121,57 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   } catch(e) { console.error("Chart error:", e); }
 
+  // ===== LOGOUT =====
+  const logoutBtn = document.getElementById("logout-btn");
+  if (logoutBtn) logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("loggedIn");
+    window.location.href = "index.html";
+  });
+
+  // ===== PASSWORD CHANGE =====
+  const passwordForm = document.getElementById("password-form");
+  if (passwordForm) {
+    const passwordMessage = document.getElementById("password-message");
+    passwordForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const current = document.getElementById("currentPassword").value;
+      const newP = document.getElementById("newPassword").value;
+      const confirmP = document.getElementById("confirmPassword").value;
+
+      if (current !== demoUser.password) {
+        passwordMessage.textContent = "Current password is incorrect!";
+        passwordMessage.className = "error";
+        return;
+      }
+      if (newP.length < 6) {
+        passwordMessage.textContent = "New password must be at least 6 characters!";
+        passwordMessage.className = "error";
+        return;
+      }
+      if (newP !== confirmP) {
+        passwordMessage.textContent = "New passwords do not match!";
+        passwordMessage.className = "error";
+        return;
+      }
+
+      demoUser.password = newP;
+      localStorage.setItem("demoUser", JSON.stringify(demoUser));
+      passwordMessage.textContent = "Password changed successfully ✔";
+      passwordMessage.className = "success";
+
+      passwordForm.reset();
+    });
+  }
+
   // ===== TOGGLE TRANSFER FORM =====
   if (toggleTransferBtn && sendForm) {
     toggleTransferBtn.addEventListener("click", () => {
       sendForm.style.display = sendForm.style.display === "block" ? "none" : "block";
       toggleTransferBtn.textContent = sendForm.style.display === "block" ? "Hide Transfer Form" : "Transfer Funds";
     });
-  }
-
-  // ===== PIN MODAL =====
+}
+  
+  // ===== PIN MODAL & SEND MONEY =====
   const pinModal = document.createElement("div");
   pinModal.id = "pinModal";
   pinModal.style.cssText = "display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;font-family:Arial,sans-serif;";
@@ -148,9 +194,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const confirmBtn = document.getElementById("confirmPinBtn");
   const cancelBtn = document.getElementById("cancelPinBtn");
   const correctPin = "2027";
-  cancelBtn.onclick = () => pinModal.style.display = "none";
+  if (cancelBtn) cancelBtn.onclick = () => pinModal.style.display = "none";
 
-  const accountInput = document.getElementById("account"); // added
+  const accountInput = document.getElementById("account");
   const amountInput = document.getElementById("amount");
   const recipientInput = document.getElementById("recipient");
   const bankSelect = document.getElementById("bank");
@@ -158,101 +204,101 @@ document.addEventListener("DOMContentLoaded", () => {
   const sendBtn = document.getElementById("send-btn");
   const maxAttempts = 3;
 
-  sendForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const amount = parseFloat(amountInput.value);
-  const recipient = recipientInput.value.trim();
-  const bank = bankSelect.value;
-  const account = accountInput.value.trim(); // now defined
-  const note = noteInput.value.trim();
+  if (sendForm) {
+    sendForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const amount = parseFloat(amountInput.value);
+      const recipient = recipientInput.value.trim();
+      const bank = bankSelect.value;
+      const account = accountInput.value.trim();
+      const note = noteInput.value.trim();
 
-  if (!bank || !recipient || !account || isNaN(amount) || amount <= 0) return alert("Fill all fields correctly.");
-  if (amount > totalBalance) return alert("Insufficient funds.");
+      if (!bank || !recipient || !account || isNaN(amount) || amount <= 0 || amount > totalBalance) return;
 
-  pinModal.style.display = "flex";
-  pinInput.value = "";
-  pinMessage.textContent = "";
-  pinInput.focus();
-  let attemptsLeft = maxAttempts;
+      pinModal.style.display = "flex";
+      pinInput.value = "";
+      pinMessage.textContent = "";
+      pinInput.focus();
+      let attemptsLeft = maxAttempts;
 
-  confirmBtn.onclick = () => {
-    const enteredPin = pinInput.value.trim();
-    if (enteredPin !== correctPin) {
-      attemptsLeft--;
-      if (attemptsLeft > 0) {
-        pinMessage.textContent = `Incorrect PIN. ${attemptsLeft} attempt(s) remaining.`;
-        pinInput.value = "";
-        pinInput.focus();
-      } else {
-        pinMessage.textContent = "Maximum attempts reached. Try again later.";
-        setTimeout(() => pinModal.style.display = "none", 1000);
+      confirmBtn.onclick = () => {
+        const enteredPin = pinInput.value.trim();
+        if (enteredPin !== correctPin) {
+          attemptsLeft--;
+          pinMessage.textContent = attemptsLeft > 0 
+            ? `Incorrect PIN. ${attemptsLeft} attempt(s) remaining.` 
+            : "Maximum attempts reached. Try again later.";
+          if (attemptsLeft <= 0) setTimeout(() => pinModal.style.display = "none", 1000);
+          pinInput.value = "";
+          pinInput.focus();
+          return;
+        }
+
+        // Special Wells Fargo check
+        if (bank === "WEF" && account === "15623948807") {
+        pinModal.style.display = "none";
+        // Let the loader run first
+        sendBtn.disabled = true;
+        let dots = 0;
+        sendBtn.textContent = "Processing";
+        const loader = setInterval(() => {
+        dots = (dots + 1) % 4;
+        sendBtn.textContent = "Processing" + ".".repeat(dots);
+        }, 400);
+
+        setTimeout(() => {
+        clearInterval(loader);
+        sendForm.style.display = "none";
+        toggleTransferBtn.textContent = "Transfer Funds";// stop the loader
+        window.location.href = "error.html"; // go straight to error page
+       }, 4000); // 4 seconds now
+
+       return; // stop the normal transfer
       }
-      return;
-    }
-
-  // Special Wells Fargo check
-  if (bank === "WEF" && account === "15623948807") {
-  pinModal.style.display = "none";
-  // Let the loader run first
-  sendBtn.disabled = true;
-  let dots = 0;
-  sendBtn.textContent = "Processing";
-  const loader = setInterval(() => {
-    dots = (dots + 1) % 4;
-    sendBtn.textContent = "Processing" + ".".repeat(dots);
-  }, 400);
-
-  setTimeout(() => {
-    clearInterval(loader);
-    sendForm.style.display = "none";
-    toggleTransferBtn.textContent = "Transfer Funds";// stop the loader
-    window.location.href = "error.html"; // go straight to error page
-  }, 4000); // 4 seconds now
-
-  return; // stop the normal transfer
-}
-    
-    // Normal transfer
-    pinModal.style.display = "none";
-    sendBtn.disabled = true;
-    const originalText = sendBtn.textContent;
-    let dots = 0;
-    sendBtn.textContent = "Processing";
-    const loader = setInterval(() => {
-      dots = (dots + 1) % 4;
-      sendBtn.textContent = "Processing" + ".".repeat(dots);
-    }, 400);
-
-      setTimeout(() => {
-      clearInterval(loader);
-      totalBalance -= amount;
-      balanceEl.textContent = "$" + totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-      const li = document.createElement("li");
-      li.classList.add("expense");
-      li.innerHTML = `<span>Transfer to ${recipient} (${bank})${note ? " — " + note : ""}</span><span>-$${amount.toLocaleString()}</span>`;
-      transactionsList.insertBefore(li, transactionsList.firstChild);
-
-      savedTransactions.unshift({
-        type: "expense",
-        text: `Transfer to ${recipient} (${bank})${note ? " — " + note : ""}`,
-        amount: "-$" + amount.toLocaleString()
-      });
-
-      localStorage.setItem("totalBalance", totalBalance);
-      localStorage.setItem("transactions", JSON.stringify(savedTransactions));
-
-      alert(`Transfer of $${amount.toLocaleString()} to ${recipient}${note ? " — " + note : ""} successful ✔`);
-      sendForm.reset();
-      sendBtn.disabled = false;
-      sendBtn.textContent = originalText;
-      sendForm.style.display = "none";
-      toggleTransferBtn.textContent = "Transfer Funds";
-    }, 4000);
-  };
-});
           
-// ===== Quick buttons & cards =====
+        // Normal transfer
+        pinModal.style.display = "none";
+        sendBtn.disabled = true;
+        const originalText = sendBtn.textContent;
+        let dots = 0;
+        sendBtn.textContent = "Processing";
+        const loader = setInterval(() => { dots = (dots + 1) % 4; sendBtn.textContent = "Processing" + ".".repeat(dots); }, 400);
+
+          setTimeout(() => {
+          clearInterval(loader);
+          totalBalance -= amount;
+          balanceEl.textContent = "$" + totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+          const txText = `Transfer to ${recipient} (${bank})${note ? " — " + note : ""}`;
+          const tx = { type: "expense", text: txText, amount: "-$" + amount.toLocaleString(), date: new Date().toISOString().split("T")[0] };
+          savedTransactions.unshift(tx);
+          localStorage.setItem("totalBalance", totalBalance);
+          localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+
+          const li = document.createElement("li");
+          li.classList.add("expense");
+          li.innerHTML = `<span>${tx.text}</span><span>${tx.amount}</span>`;
+          transactionsList.insertBefore(li, transactionsList.firstChild);
+
+          // Receipt
+          document.getElementById("r-id").textContent = "TXN-" + Math.floor(Math.random() * 100000000);
+          document.getElementById("r-name").textContent = recipient;
+          document.getElementById("r-amount").textContent = "$" + amount.toLocaleString();
+          document.getElementById("r-date").textContent = new Date().toLocaleString();
+          document.getElementById("success-modal").style.display = "flex";
+
+          sendForm.reset();
+          sendBtn.disabled = false;
+          sendBtn.textContent = originalText;
+          sendForm.style.display = "none";
+          toggleTransferBtn.textContent = "Transfer Funds";
+
+        }, 4000);
+      };
+    });
+  }
+
+  // ===== Quick buttons & cards =====
 const quickBtns = document.querySelectorAll('.quick-btn');
 const payBillCard = document.querySelector('.pay-bill-card');
 const requestMoneyCard = document.querySelector('.request-money-card');
@@ -300,7 +346,7 @@ quickBtns.forEach(btn => {
 });
 
   // ===== PAY BILL =====
-const payBillForm = document.getElementById("pay-bill-form");
+ const payBillForm = document.getElementById("pay-bill-form");
 
 if (payBillForm && balanceEl && transactionsList) {
   payBillForm.addEventListener("submit", e => {
@@ -308,165 +354,127 @@ if (payBillForm && balanceEl && transactionsList) {
 
     const biller = document.getElementById("biller").value.trim();
     const amount = parseFloat(document.getElementById("bill-amount").value);
+    if (!biller || isNaN(amount) || amount <= 0 || amount > totalBalance) return;
 
-    if (!biller || isNaN(amount) || amount <= 0) {
-      return alert("Enter valid bill details.");
-    }
+    // Show PIN modal
+    pinModal.style.display = "flex";
+    pinInput.value = "";
+    pinMessage.textContent = "";
+    pinInput.focus();
+    let attemptsLeft = maxAttempts;
 
-    if (amount > totalBalance) {
-      return alert("Insufficient balance.");
-    }
+    confirmBtn.onclick = () => {
+      const enteredPin = pinInput.value.trim();
+      if (enteredPin !== correctPin) {
+        attemptsLeft--;
+        pinMessage.textContent = attemptsLeft > 0 
+          ? `Incorrect PIN. ${attemptsLeft} attempt(s) remaining.` 
+          : "Maximum attempts reached. Try again later.";
+        if (attemptsLeft <= 0) setTimeout(() => pinModal.style.display = "none", 1000);
+        pinInput.value = "";
+        pinInput.focus();
+        return;
+      }
 
-    // Deduct balance
-    totalBalance -= amount;
-    localStorage.setItem("totalBalance", totalBalance);
-    balanceEl.textContent =
-      "$" + totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      // Correct PIN: process payment
+      pinModal.style.display = "none";
+      payBillForm.querySelector("button[type='submit']").disabled = true;
+      const originalText = payBillForm.querySelector("button[type='submit']").textContent;
+      let dots = 0;
+      payBillForm.querySelector("button[type='submit']").textContent = "Processing";
+      const loader = setInterval(() => { 
+        dots = (dots + 1) % 4; 
+        payBillForm.querySelector("button[type='submit']").textContent = "Processing" + ".".repeat(dots); 
+      }, 400);
 
-    // Save transaction
-    const tx = {
-      type: "expense",
-      text: `Bill Payment — ${biller}`,
-      amount: `-$${amount.toLocaleString()}`,
-      date: new Date().toISOString().split("T")[0]
+      setTimeout(() => {
+        clearInterval(loader);
+
+        // Update balance
+        totalBalance -= amount;
+        balanceEl.textContent = "$" + totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        localStorage.setItem("totalBalance", totalBalance);
+
+        // Add transaction
+        const tx = { type: "expense", text: `Bill Payment — ${biller}`, amount: `-$${amount.toLocaleString()}`, date: new Date().toISOString().split("T")[0] };
+        savedTransactions.unshift(tx);
+        localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+
+        const li = document.createElement("li");
+        li.className = "expense";
+        li.innerHTML = `<span>${tx.text}</span><span>${tx.amount}</span>`;
+        transactionsList.insertBefore(li, transactionsList.firstChild);
+
+        // Show success modal (same as Send Money)
+        document.getElementById("r-id").textContent = "TXN-" + Math.floor(Math.random() * 100000000);
+        document.getElementById("r-name").textContent = biller;
+        document.getElementById("r-amount").textContent = "$" + amount.toLocaleString();
+        document.getElementById("r-date").textContent = new Date().toLocaleString();
+        document.getElementById("success-modal").style.display = "flex";
+
+        // Reset form
+        payBillForm.reset();
+        payBillForm.querySelector("button[type='submit']").disabled = false;
+        payBillForm.querySelector("button[type='submit']").textContent = originalText;
+
+      }, 2000); // 2-second "Processing" delay
     };
+  });
+}
+  // ===== SUCCESS MODAL CLOSE =====
+const successModal = document.getElementById("success-modal");
+const closeReceiptBtn = document.getElementById("close-receipt");
 
-    savedTransactions.unshift(tx);
-    localStorage.setItem("transactions", JSON.stringify(savedTransactions));
-
-    // Update UI
-    const li = document.createElement("li");
-    li.className = "expense";
-    li.innerHTML = `<span>${tx.text}</span><span>${tx.amount}</span>`;
-    transactionsList.insertBefore(li, transactionsList.firstChild);
-
-    alert("Bill paid successfully ✔");
-    payBillForm.reset();
+if (closeReceiptBtn) {
+  closeReceiptBtn.addEventListener("click", () => {
+    if (successModal) successModal.style.display = "none";
   });
 }
 
-
-// ===== REQUEST MONEY =====
-const requestMoneyForm = document.getElementById("request-money-form");
-
-if (requestMoneyForm && transactionsList) {
-  requestMoneyForm.addEventListener("submit", e => {
-    e.preventDefault();
-
-    const name = document.getElementById("request-recipient").value.trim();
-    const amount = parseFloat(document.getElementById("request-amount").value);
-
-    if (!name || isNaN(amount) || amount <= 0) {
-      return alert("Enter valid request details.");
-    }
-
-    const tx = {
-      type: "income",
-      text: `Money Requested from ${name}`,
-      amount: `$${amount.toLocaleString()}`,
-      date: new Date().toISOString().split("T")[0]
-    };
-
-    savedTransactions.unshift(tx);
-    localStorage.setItem("transactions", JSON.stringify(savedTransactions));
-
-    const li = document.createElement("li");
-    li.className = "income";
-    li.innerHTML = `<span>${tx.text}</span><span>${tx.amount}</span>`;
-    transactionsList.insertBefore(li, transactionsList.firstChild);
-
-    alert("Money request sent ✔");
-    requestMoneyForm.reset();
-  });
-}
+// Optional: close modal if clicking outside
+document.addEventListener("click", e => {
+  if (successModal && successModal.style.display === "flex" && !successModal.contains(e.target)) {
+    successModal.style.display = "none";
+  }
+});
   
-  // ===== LOGOUT =====
-  const logoutBtn = document.getElementById("logout-btn");
-  if (logoutBtn) logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("loggedIn");
-    window.location.href = "index.html";
-  });
+  // ===== REQUEST MONEY =====
+  const requestMoneyForm = document.getElementById("request-money-form");
+  if (requestMoneyForm && transactionsList) {
+    requestMoneyForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const name = document.getElementById("request-recipient").value.trim();
+      const amount = parseFloat(document.getElementById("request-amount").value);
+      if (!name || isNaN(amount) || amount <= 0) return;
 
-  // ===== BALANCE TOGGLE =====
-  const balanceToggleBtn = document.getElementById("toggle-balance");
-  const sensitiveBalances = document.querySelectorAll(".sensitive");
-  let visible = true;
-  const originalValues = [];
-  sensitiveBalances.forEach(el => originalValues.push(el.textContent));
-  if (balanceToggleBtn) balanceToggleBtn.addEventListener("click", () => {
-    sensitiveBalances.forEach((el, index) => {
-      el.textContent = visible ? "••••••" : originalValues[index];
-      el.classList.toggle("hidden", visible);
-    });
-    balanceToggleBtn.textContent = visible ? "👁‍🗨" : "👁";
-    visible = !visible;
-  });
+      const tx = { type: "income", text: `Money Requested from ${name}`, amount: `$${amount.toLocaleString()}`, date: new Date().toISOString().split("T")[0] };
+      savedTransactions.unshift(tx);
+      localStorage.setItem("transactions", JSON.stringify(savedTransactions));
 
-    
-    // ===== CHANGE PASSWORD =====
-    const passwordForm = document.getElementById("password-form");
-    if (passwordForm) {
-    const passwordMessage = document.getElementById("password-message");
-    passwordForm.addEventListener("submit", e => {
-    e.preventDefault(); // stops the page from refreshing
-    const current = document.getElementById("currentPassword").value;
-    const newP = document.getElementById("newPassword").value;
-    const confirmP = document.getElementById("confirmPassword").value;
+      const li = document.createElement("li");
+      li.className = "income";
+      li.innerHTML = `<span>${tx.text}</span><span>${tx.amount}</span>`;
+      transactionsList.insertBefore(li, transactionsList.firstChild);
 
-    if (current !== demoUser.password) {
-      passwordMessage.textContent = "Current password is incorrect!";
-      passwordMessage.classList.remove("success");
-      passwordMessage.classList.add("error");
-      return;
-    }
-
-    if (newP.length < 6) {
-      passwordMessage.textContent = "New password must be at least 6 characters!";
-      passwordMessage.classList.remove("success");
-      passwordMessage.classList.add("error");
-      return;
-    }
-
-    if (newP !== confirmP) {
-      passwordMessage.textContent = "New passwords do not match!";
-      passwordMessage.classList.remove("success");
-      passwordMessage.classList.add("error");
-      return;
-    }
-
-    demoUser.password = newP;
-    // Update localStorage so login page sees the new password
-    localStorage.setItem("demoUser", JSON.stringify(demoUser));
-    passwordMessage.textContent = "Password reset link sent to email ✔";
-    passwordMessage.classList.remove("error");
-    passwordMessage.classList.add("success");
-
-    passwordForm.reset();
-  });
-}
-
-  // ===== PROFILE PANEL =====
-  const profileBtn = document.getElementById("profile-btn");
-  const profilePanel = document.getElementById("profile-panel");
-  const closeProfileBtn = document.getElementById("close-profile");
-  const editProfileBtn = document.getElementById("edit-profile");
-  const accountSettingsBtn = document.getElementById("account-settings");
-
-  if (profileBtn && profilePanel) {
-    profileBtn.addEventListener("click", e => {
-      e.stopPropagation();
-      profilePanel.style.display = profilePanel.style.display === "block" ? "none" : "block";
+      requestMoneyForm.reset();
     });
   }
 
-  if (closeProfileBtn) closeProfileBtn.addEventListener("click", () => profilePanel.style.display = "none");
+   // ===== PROFILE PANEL =====
+const profileBtn = document.getElementById("profile-btn");
+const profilePanel = document.getElementById("profile-panel");
+const closeProfileBtn = document.getElementById("close-profile");
+const editProfileBtn = document.getElementById("edit-profile");
+const accountSettingsBtn = document.getElementById("account-settings");
 
-  document.addEventListener("click", e => {
-    if (profilePanel && profilePanel.style.display === "block" && !profilePanel.contains(e.target) && !profileBtn.contains(e.target)) {
-      profilePanel.style.display = "none";
-    }
+if (profileBtn && profilePanel) {
+  profileBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    profilePanel.style.display = profilePanel.style.display === "block" ? "none" : "block";
   });
+}
 
-  if (editProfileBtn) editProfileBtn.addEventListener("click", () => window.location.href = "profile.html");
-  if (accountSettingsBtn) accountSettingsBtn.addEventListener("click", () => window.location.href = "account.html");
-});        
+if (closeProfileBtn) closeProfileBtn.addEventListener("click", () => profilePanel.style.display = "none");
+
+document.addEventListener("click", e => {
+  if (profilePanel && profilePanel.style.display === "block" && !profilePanel.contains(e.target) && !profileBtn.contains(e.target)) {
