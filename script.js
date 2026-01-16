@@ -625,13 +625,20 @@ if (cancelPinBtn) {
     if (profileConnector) profileConnector.style.display = "none"; // ✅ hide the connector too
    });
 
+    // Close profile panel when clicking outside
     document.addEventListener("click", e => {
-      if (profilePanel && profilePanel.style.display === "block" && !profilePanel.contains(e.target) && profileBtn && !profileBtn.contains(e.target)) {
-        profilePanel.style.display = "none";
-      if (profileConnector) profileConnector.style.display = "none";
-    });
+    if (
+    profilePanel &&
+    profilePanel.style.display === "block" &&
+    !profilePanel.contains(e.target) &&
+    profileBtn &&
+    !profileBtn.contains(e.target)
+  ) {
+    profilePanel.style.display = "none";
+    if (profileConnector) profileConnector.style.display = "none";
+  }
+});
 
-    if (editProfileBtn) editProfileBtn.addEventListener("click", () => window.location.href = "profile.html");
-    if (accountSettingsBtn) accountSettingsBtn.addEventListener("click", () => window.location.href = "account.html");
-  });
-})();
+// Independent listeners for profile actions
+if (editProfileBtn) editProfileBtn.addEventListener("click", () => window.location.href = "profile.html");
+if (accountSettingsBtn) accountSettingsBtn.addEventListener("click", () => window.location.href = "account.html");
