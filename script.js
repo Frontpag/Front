@@ -57,19 +57,16 @@
     }
 
      // ===== TOTAL BALANCE =====
-     const balanceEl = document.querySelector(".balance");
-     let totalBalance = parseFloat(localStorage.getItem("totalBalance"));
+    const balanceEl = document.querySelector(".balance");
+    let totalBalance = parseFloat(localStorage.getItem("totalBalance"));
 
-     // If no stored balance, compute from transactions
-     if (isNaN(totalBalance)) {
-     totalBalance = computeBalanceFromTransactions(savedTransactions);
+    // Only set manual balance if nothing is stored yet
+    if (isNaN(totalBalance)) {
+    totalBalance = 1500450.50; // <-- starting balance manually
+    localStorage.setItem("totalBalance", String(totalBalance));
    }
 
-    // ===== MANUAL SET OR ADD BALANCE =====
-    totalBalance = 1500450.50; // <-- Replace with exact balance you want, overrides any computed balance
-
-    // Save and display
-    localStorage.setItem("totalBalance", String(totalBalance));
+    // Update display
     if (balanceEl) balanceEl.textContent = formatCurrency(totalBalance);
     
     // ===== LOGIN FORM =====
