@@ -444,7 +444,10 @@
             // ===== SHOW SUCCESS MODAL =====
             const successModal = $("success-modal");
             if (successModal) {
-              successModal.style.display = "flex";
+             successModal.style.display = "flex";
+              // Store last transaction globally for PDF
+              window.lastTransactionDetails = details;
+              window.lastTransactionAction = action; // optional, for context
               successModal.style.position = "fixed";
               successModal.style.top = "50%";
               successModal.style.left = "50%";
@@ -596,7 +599,11 @@
         doc.setFontSize(14); doc.text("Account Information", 20, y); y += 8;
         doc.setFontSize(12);
         doc.text("From Account: JPMorgan Chase Bank, N.A. (****8433)", 20, y); y += 8;
-        doc.text(`To Account: ${details.recipient} — ${details.account} (${details.bank || "N/A"})`, 20, y); y += 12;
+        const details = window.lastTransactionDetails;
+        if (!details) return alert("No transaction data available for PDF.");
+
+        doc.text(`To Account: ${details.recipient} — ${details.account} (${details.bank || "N/A"})`, 20, y); 
+        y += 12;
         
         // Authorization Statement
         doc.setFontSize(14); doc.text("Authorization Statement", 20, y); y += 8;
