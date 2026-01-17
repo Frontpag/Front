@@ -589,8 +589,8 @@
         // Transfer Details
         doc.setFontSize(14); doc.text("Transfer Details", 20, y); y += 8;
         doc.setFontSize(12);
-        doc.text(`Payment Amount: $${amount}`, 20, y); y += 8;
-        doc.text(`Transaction Fee: $${fee}`, 20, y); y += 12;
+        doc.text(`Payment Amount: ${formatCurrency(parseAmount(amount))}`, 20, y); y += 8;
+        doc.text(`Transaction Fee: ${formatCurrency(parseAmount(fee))}`, 20, y); y += 8;
 
         // Account Info
         doc.setFontSize(14); doc.text("Account Information", 20, y); y += 8;
